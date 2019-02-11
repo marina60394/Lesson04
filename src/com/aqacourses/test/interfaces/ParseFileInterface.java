@@ -13,6 +13,6 @@ public interface ParseFileInterface {
      * @param pathToFile
      * @return ArrayList
      */
-    public ArrayList <ArrayList<String>> parseFile(String pathToFile) throws IOException;
+    ArrayList <String> parseFile(String pathToFile) throws IOException;
 
 }

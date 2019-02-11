@@ -50,7 +50,7 @@ public class Runner {
 
         // Create instance of NKI student
         StudentPedin studentPedin = new StudentPedin();
-        ArrayList<ArrayList<String>> studentData = studentPedin.parseFile("./src/com/aqacourses/test/DBFiles/PedinStudents.txt");
+        ArrayList<String> studentData = studentPedin.parseFile("./src/com/aqacourses/test/DBFiles/PedinStudents.txt");
         studentPedin.writeToDb(studentData);
 
     }

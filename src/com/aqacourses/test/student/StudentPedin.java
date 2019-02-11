@@ -12,49 +12,29 @@ import java.util.List;
  */
 public class StudentPedin extends Student implements ParseFileInterface, WriteToDbInterface {
 
-    private FileWriter fileWriter;
-    private PrintWriter printWriter;
+    private File file;
+    private BufferedWriter bufferedWriter;
 
     @Override
     public void writeToDb(List <String> data) {
-        ArrayList <String> student = new ArrayList <String>();
+
+        ArrayList <String> student = (ArrayList <String>) data;
+
         try {
             openConnectionToDb();
-            if (validateData(data) && isDataValid(student)) {
-                for (String datum : data) {
-                    printWriter.println(getDate() + " - " + datum);
+            if (isDataValid(student)) {
+                for (String datum : student) {
+                    bufferedWriter.write(getDate() + " - " + datum);
+                    bufferedWriter.newLine();
                 }
-                printWriter.print("=====================\n");
-                System.out.println("All data is written to MS -SQL-DB");
+                bufferedWriter.write("==================\n");
+                System.out.println("All data is written to MS-SQL DB");
                 closeConnectionToDb();
             }
         } catch (IOException e) {
+            System.err.println("ERROR!!!");
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Overload method writeToDB
-     * @param data
-     */
-    public void writeToDb(ArrayList <ArrayList <String>> data) {
-        try {
-            openConnectionToDb();
-            for (ArrayList <String> student : data) {
-                if (isDataValid(student)) {
-                    for (String value : student) {
-                        printWriter.println(getDate() + " - " + value);
-                    }
-                    printWriter.print("=====================\n");
-                }
-            }
-            System.out.println("All data is written to MS -SQL-DB");
-            closeConnectionToDb();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
     }
 
     /**
@@ -65,8 +45,8 @@ public class StudentPedin extends Student implements ParseFileInterface, WriteTo
      * @throws IOException
      */
     @Override
-    public ArrayList <ArrayList <String>> parseFile(String pathToFile) throws IOException {
-        ArrayList <ArrayList <String>> listOfStudents = new ArrayList <ArrayList <String>>();
+    public ArrayList <String> parseFile(String pathToFile) throws IOException {
+        ArrayList <String> students = new ArrayList <>();
 
         FileReader fileReader = new FileReader(pathToFile);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -74,32 +54,17 @@ public class StudentPedin extends Student implements ParseFileInterface, WriteTo
         String studentSeparator = "==================";
 
         int countLine = 0;
-        ArrayList <String> student = new ArrayList <String>();
 
         while ((line = bufferedReader.readLine()) != null) {
             countLine++;
 
-            if (countLine == 1) {
-                String name = line.substring(22);
-                student.add(name);
-            }
-            if (countLine == 2) {
-                String age = line.substring(22);
-                student.add(age);
-            }
-            if (countLine == 3) {
-                String sex = line.substring(22);
-                student.add(sex);
-            }
-
             if (line.equals(studentSeparator)) {
-                listOfStudents.add(student);
-                student = new ArrayList <String>();
                 countLine = 0;
-            }
+            } else
+                students.add(line);
         }
         bufferedReader.close();
-        return listOfStudents;
+        return students;
     }
 
 
@@ -110,17 +75,21 @@ public class StudentPedin extends Student implements ParseFileInterface, WriteTo
      */
     private void openConnectionToDb() throws IOException {
         String path = "./src/com/aqacourses/test/DBFiles/MS-SQL-DB.txt";
-        fileWriter = new FileWriter(path);
-        printWriter = new PrintWriter(fileWriter);
+        file = new File(path);
+        bufferedWriter = new BufferedWriter(new FileWriter(file, true));
     }
 
     /**
      * CLose connection to MS SQL DB
      */
     private void closeConnectionToDb() throws IOException {
-        printWriter.close();
-        fileWriter.close();
-        System.out.println("Close connection to MS SQL DB");
+        try {
+            bufferedWriter.close();
+        } catch (IOException e) {
+            System.err.println("Cannot close connection to MS-SQL-DB");
+            e.printStackTrace();
+        }
+        System.out.println("Close connection to Postgres MS-SQL-DB");
     }
 
 }
